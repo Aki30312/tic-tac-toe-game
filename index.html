@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tic Tac Toe – Solo or Duo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <h1>Tic Tac Toe</h1>
+      <p class="sub">Solo vs Computer 🤖 or Two Players 👥</p>
+    </header>
+
+    <!-- MODE + NAMES -->
+    <section class="panel">
+      <div class="mode">
+        <button id="singlePlayerBtn" class="btn btn-primary" type="button">Single Player</button>
+        <button id="twoPlayerBtn" class="btn" type="button">Two Player</button>
+      </div>
+
+      <div class="names">
+        <div class="field">
+          <label for="p1Name">Player 1 (X)</label>
+          <input id="p1Name" type="text" placeholder="e.g., Aklesia" maxlength="18" />
+        </div>
+
+        <div class="field" id="p2Field">
+          <label for="p2Name">Player 2 (O)</label>
+          <input id="p2Name" type="text" placeholder="e.g., Friend" maxlength="18" />
+        </div>
+
+        <button id="startBtn" class="btn btn-success" type="button">Start Game</button>
+      </div>
+    </section>
+
+    <!-- SCORE + STATUS -->
+    <section class="panel scoreboard">
+      <div class="score">
+        <span id="labelX">X</span>
+        <strong id="scoreX">0</strong>
+      </div>
+
+      <div class="status">
+        <div id="turnBadge" class="badge">Choose a mode to begin</div>
+        <div id="hint" class="hint">Tip: Single Player uses smart win/block moves.</div>
+      </div>
+
+      <div class="score">
+        <span id="labelO">O</span>
+        <strong id="scoreO">0</strong>
+      </div>
+    </section>
+
+    <!-- BOARD -->
+    <section class="board-wrap">
+      <div id="board" class="board" aria-label="Tic Tac Toe board">
+        <!-- 9 cells -->
+        <button class="cell" data-i="0" aria-label="cell 1"></button>
+        <button class="cell" data-i="1" aria-label="cell 2"></button>
+        <button class="cell" data-i="2" aria-label="cell 3"></button>
+        <button class="cell" data-i="3" aria-label="cell 4"></button>
+        <button class="cell" data-i="4" aria-label="cell 5"></button>
+        <button class="cell" data-i="5" aria-label="cell 6"></button>
+        <button class="cell" data-i="6" aria-label="cell 7"></button>
+        <button class="cell" data-i="7" aria-label="cell 8"></button>
+        <button class="cell" data-i="8" aria-label="cell 9"></button>
+      </div>
+
+      <!-- Winning line overlay -->
+      <div id="winLine" class="win-line hidden"></div>
+    </section>
+
+    <!-- ACTIONS -->
+    <section class="panel actions">
+      <button id="restartBtn" class="btn" type="button">Restart Round</button>
+      <button id="resetBtn" class="btn btn-danger" type="button">Reset All</button>
+    </section>
+
+    <!-- END MODAL -->
+    <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-box">
+        <h2 id="modalTitle">Game Over</h2>
+        <p id="modalText"></p>
+        <div class="modal-actions">
+          <button id="playAgainBtn" class="btn btn-success" type="button">Play Again</button>
+          <button id="closeModalBtn" class="btn" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFETTI -->
+    <canvas id="confetti" class="confetti"></canvas>
+
+    <footer class="footer">
+      <small>Built with HTML + CSS + JS • Responsive • Animated</small>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
