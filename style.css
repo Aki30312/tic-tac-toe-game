@@ -276,6 +276,26 @@ body{
   justify-content:center;
   margin-top: 12px;
 }
+/* FIX: buttons inside white modal should be dark and clear */
+.modal-box .btn{
+  background: rgba(0,0,0,0.10);
+  color: #111;
+  font-weight: 800;
+}
+
+.modal-box .btn:hover{
+  background: rgba(0,0,0,0.16);
+}
+
+.modal-box .btn-success{
+  background: rgba(34,197,94,0.35);
+  color: #0b1f12;
+}
+
+.modal-box .btn-success:hover{
+  background: rgba(34,197,94,0.45);
+}
+
 
 /* Confetti canvas */
 .confetti{
