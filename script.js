@@ -29,6 +29,42 @@ const closeModalBtn = document.getElementById("closeModalBtn");
 
 const winLine = document.getElementById("winLine");
 
+// Icons
+const ICONS = {
+  X: "assets/x-icon.png",
+  O: "assets/o-icon.png"
+};
+
+// Sounds (safe optional)
+const sfxWin = document.getElementById("sfxWin");
+const sfxDraw = document.getElementById("sfxDraw");
+const sfxClick = document.getElementById("sfxClick");
+
+function playSound(audioEl){
+  if (!audioEl) return;
+  audioEl.currentTime = 0;
+  audioEl.play().catch(() => {});
+}
+let audioUnlocked = false;
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+
+  [sfxWin, sfxDraw, sfxClick].forEach(a => {
+    if (!a) return;
+    a.muted = true;
+    a.play().then(() => {
+      a.pause();
+      a.currentTime = 0;
+      a.muted = false;
+    }).catch(() => {});
+  });
+}
+
+document.addEventListener("click", unlockAudio, { once: true });
+
+
 // Confetti
 const confettiCanvas = document.getElementById("confetti");
 const ctx = confettiCanvas.getContext("2d");
@@ -83,7 +119,6 @@ function updateLabelsAndScores() {
 // UI: badge text
 function setTurnText(text, tone = "neutral") {
   turnBadge.textContent = text;
-  // tone hint (simple)
   turnBadge.style.boxShadow = "none";
   if (tone === "good") turnBadge.style.boxShadow = "0 0 0 4px rgba(34,197,94,0.14)";
   if (tone === "bad") turnBadge.style.boxShadow = "0 0 0 4px rgba(239,68,68,0.14)";
@@ -121,24 +156,38 @@ function resetAll() {
   startRound();
 }
 
-// UI: render board from state
+/* ✅ Helper: render icon into a cell */
+function setCellIcon(cell, mark) {
+  cell.innerHTML = "";
+  if (mark === "X" || mark === "O") {
+    const img = document.createElement("img");
+    img.src = ICONS[mark];
+    img.alt = mark;
+    cell.appendChild(img);
+  }
+}
+
+// UI: render board from state (✅ icons)
 function renderBoard() {
   cells.forEach((cell, i) => {
-    cell.textContent = board[i];
     cell.classList.toggle("filled", board[i] !== "");
     cell.classList.remove("win", "invalid");
+    setCellIcon(cell, board[i]); // ✅ icon instead of text
   });
 }
 
-// Game: place a mark if possible
+// Game: place a mark if possible (✅ icons + click sound)
 function placeMark(index, mark) {
   if (board[index] !== "" || gameOver) return false;
   board[index] = mark;
 
   const cell = cells[index];
-  cell.textContent = mark;
+  setCellIcon(cell, mark); // ✅ icon instead of text
   cell.classList.add("filled", "pop");
   setTimeout(() => cell.classList.remove("pop"), 180);
+
+  // ✅ click sound (optional)
+  playSound(sfxClick);
 
   return true;
 }
@@ -173,10 +222,8 @@ function showWin(line) {
 
 // UI: win line orientation
 function drawWinLine(line) {
-  // base is horizontal across center; rotate/translate based on line
   winLine.classList.remove("hidden");
 
-  // Map line to transform
   const key = line.join("");
   const map = {
     "012": { r: 0,   x: 0,   y: -33.33 },
@@ -192,7 +239,6 @@ function drawWinLine(line) {
   };
 
   const cfg = map[key] || { r: 0, x: 0, y: 0 };
-  // Use percentage translate in container coordinates
   winLine.style.transform = `translate(${cfg.x}%, ${cfg.y}%) rotate(${cfg.r}deg)`;
 }
 
@@ -220,7 +266,7 @@ function flashInvalid(cellIndex) {
   setTimeout(() => cell.classList.remove("invalid"), 300);
 }
 
-// Round end handler
+// Round end handler (✅ add win/draw sounds)
 function endRound(winner, line) {
   gameOver = true;
   locked = true;
@@ -234,11 +280,13 @@ function endRound(winner, line) {
     showModal(title, `${names.X}: ${scores.X}  •  ${names.O}: ${scores.O}`);
     setTurnText(title, "good");
 
-    // Confetti for a human win or any win (your choice). Here: always.
+    playSound(sfxWin);     // ✅
     startConfetti();
   } else {
     showModal("🟰 Draw!", `No winner this round.\n${names.X}: ${scores.X}  •  ${names.O}: ${scores.O}`);
     setTurnText("Draw!", "warn");
+
+    playSound(sfxDraw);    // ✅
   }
 }
 
@@ -250,7 +298,6 @@ function evaluateGameAfterMove() {
 
   switchTurn();
 
-  // If single player and it's computer turn (O), trigger AI
   if (gameMode === "single" && currentPlayer === "O") {
     locked = true;
     setTurnText("Computer thinking…", "info");
@@ -282,15 +329,12 @@ function doesBoardWin(customBoard, mark) {
 
 // AI: choose best move (win > block > priority)
 function getBestAIMove() {
-  // 1) try win
   const winMove = findWinningMove("O");
   if (winMove !== null) return winMove;
 
-  // 2) try block X
   const blockMove = findWinningMove("X");
   if (blockMove !== null) return blockMove;
 
-  // 3) priority
   for (const i of AI_PRIORITY) {
     if (board[i] === "") return i;
   }
@@ -304,7 +348,6 @@ function makeComputerMove() {
   if (move === null) return;
 
   placeMark(move, "O");
-  // small AI flash
   cells[move].classList.add("win");
   setTimeout(() => cells[move].classList.remove("win"), 220);
 
@@ -346,8 +389,6 @@ boardEl.addEventListener("click", (e) => {
   const index = Number(cell.dataset.i);
 
   if (locked || gameOver) return;
-
-  // In single player: human is X only
   if (gameMode === "single" && currentPlayer !== "X") return;
 
   const ok = placeMark(index, currentPlayer);
@@ -409,7 +450,6 @@ function startConfetti() {
   confettiPieces = Array.from({ length: 160 }, createPiece);
   if (confettiId) cancelAnimationFrame(confettiId);
   animateConfetti();
-  // stop after ~2.5s for polish
   setTimeout(() => stopConfetti(), 2500);
 }
 
